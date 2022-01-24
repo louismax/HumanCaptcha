@@ -1,6 +1,9 @@
 package toft
 
 import (
+	randC "crypto/rand"
+	"math"
+	"math/big"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -67,4 +70,21 @@ func randStr(n int, letter ...string) string {
 		remain--
 	}
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+// RandInt 生成区间[-m, n]的安全随机数
+func RandInt(min, max int) int {
+	if min > max {
+		return max
+	}
+
+	if min < 0 {
+		f64Min := math.Abs(float64(min))
+		i64Min := int(f64Min)
+		result, _ := randC.Int(randC.Reader, big.NewInt(int64(max+1+i64Min)))
+
+		return int(result.Int64() - int64(i64Min))
+	}
+	result, _ := randC.Int(randC.Reader, big.NewInt(int64(max-min+1)))
+	return int(int64(min) + result.Int64())
 }
