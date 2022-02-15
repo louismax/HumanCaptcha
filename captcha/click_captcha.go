@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/louismax/HumanCaptcha/toft"
 	"github.com/sirupsen/logrus"
+	"image/color"
 	"math"
 	"math/rand"
 	"strings"
@@ -46,21 +47,7 @@ func initClickCaptcha() *ClickCaptcha {
 
 // Generate is a function
 /**
- * @Description: 			根据设置的尺寸生成验证码图片
- * @return CaptchaCharDot	位置信息
- * @return string			主图Base64
- * @return string			验证码KEY
- * @return string			缩略图Base64
- * @return error
- */
-//func (cc *ClickCaptcha) Generate() (map[int]CharDot, string, string, string, error) {
-//	dots, ib64, tb64, key, err := cc.GenerateWithSize(, )
-//	return dots, ib64, tb64, key, err
-//}
-
-// GenerateWithSize is a function
-/**
- * @Description: 			生成验证码图片
+ * @Description: 			生成验证码
  * @param imageSize			主图尺寸
  * @param thumbnailSize		缩略图尺寸
  * @return CaptchaCharDot	位置信息
@@ -69,21 +56,27 @@ func initClickCaptcha() *ClickCaptcha {
  * @return string			缩略图Base64
  * @return error
  */
-func (cc *ClickCaptcha) GenerateWithSize() (map[int]CharDot, string, string, string, error) {
+func (cc *ClickCaptcha) Generate() (map[int]CharDot, string, string, string, error) {
 	length := toft.RandInt(cc.config.rangTextLen.Min, cc.config.rangTextLen.Max)
+
+	//获取随机字符串
 	chars := cc.getClickCaptchaChars(length)
 	if chars == "" {
 		return nil, "", "", "", fmt.Errorf("获取随机字符串失败")
 	}
 
+	var err error
 	var allDots, thumbDots, checkDots map[int]CharDot
 	var imageBase64, tImageBase64 string
 	var checkChars string
-
+	//生成字符在图片上的点
 	allDots = cc.genDots(cc.config.imageSize, cc.config.rangFontSize, chars, 10)
-	// checkChars = "A:B:C"
+
+	//随机检测点
 	checkDots, checkChars = cc.rangeCheckDots(allDots)
+
 	thumbDots = cc.genDots(cc.config.thumbnailSize, cc.config.rangCheckFontSize, checkChars, 0)
+
 	imageBase64, err = cc.genCaptchaImage(cc.config.imageSize, allDots)
 	if err != nil {
 		return nil, "", "", "", err
@@ -95,7 +88,20 @@ func (cc *ClickCaptcha) GenerateWithSize() (map[int]CharDot, string, string, str
 
 	str, _ := json.Marshal(checkDots)
 	key, _ := cc.genCaptchaKey(string(str))
-	return checkDots, imageBase64, tImageBase64, key, err
+	return checkDots, imageBase64, tImageBase64, key, nil
+}
+
+/**
+ * @Description: 生成唯一KEY
+ * @receiver cc
+ * @param str
+ * @return string
+ * @return error
+ */
+func (cc *ClickCaptcha) genCaptchaKey(str string) (string, error) {
+	t := GenUniqueId()
+	keyStr := toft.Md5ToStr(str + t)
+	return keyStr, nil
 }
 
 /**
@@ -122,8 +128,8 @@ func (cc *ClickCaptcha) genDots(imageSize Size, fontSize RangeVal, chars string,
 		// 随机角度
 		randAngle := cc.getRandAngle()
 		// 随机颜色
-		randColor := cc.getRandColor(cc.config.rangFontColors)
-		randColor2 := cc.getRandColor(cc.config.rangThumbFontColors)
+		randColor := toft.GetRandomStringValue(cc.config.rangFontColors)
+		randColor2 := toft.GetRandomStringValue(cc.config.rangThumbFontColors)
 
 		// 随机文字大小
 		randFontSize := toft.RandInt(fontSize.Min, fontSize.Max)
@@ -190,7 +196,7 @@ func (cc *ClickCaptcha) rangeCheckDots(dots map[int]CharDot) (map[int]CharDot, s
  * @return string
  * @return error
  */
-func (cc *ClickCaptcha) genCaptchaImage(size Size, dots map[int]CharDot) (base64 string, erro error) {
+func (cc *ClickCaptcha) genCaptchaImage(size Size, dots map[int]CharDot) (base64 string, err error) {
 	var drawDots []DrawDot
 	for _, dot := range dots {
 		drawDot := DrawDot{
@@ -203,7 +209,7 @@ func (cc *ClickCaptcha) genCaptchaImage(size Size, dots map[int]CharDot) (base64
 			Size:    dot.Size,
 			Width:   dot.Width,
 			Height:  dot.Height,
-			Font:    cc.genRandWithString(cc.config.rangFont),
+			Font:    toft.GetRandomStringValue(cc.config.rangFont),
 		}
 
 		drawDots = append(drawDots, drawDot)
@@ -212,7 +218,7 @@ func (cc *ClickCaptcha) genCaptchaImage(size Size, dots map[int]CharDot) (base64
 	img, err := cc.captchaDraw.Draw(DrawCanvas{
 		Width:             size.Width,
 		Height:            size.Height,
-		Background:        cc.genRandWithString(cc.config.rangBackground),
+		Background:        toft.GetRandomStringValue(cc.config.rangBackground),
 		BackgroundDistort: cc.getRandDistortWithLevel(cc.config.imageFontDistort),
 		TextAlpha:         cc.config.imageFontAlpha,
 		FontHinting:       cc.config.fontHinting,
@@ -223,14 +229,90 @@ func (cc *ClickCaptcha) genCaptchaImage(size Size, dots map[int]CharDot) (base64
 		TextShadowPoint: cc.config.textShadowPoint,
 	})
 	if err != nil {
-		erro = err
 		return
 	}
 
 	// 转 base64
-	base64 = cc.EncodeB64stringWithJpeg(img)
+	base64 = toft.EncodingImageToBase64StrForJpeg(img, cc.config.imageQuality)
 	return
 }
+
+/**
+ * @Description: 验证码缩略画图
+ * @receiver cc
+ * @param size
+ * @param dots
+ * @return string
+ * @return error
+ */
+func (cc *ClickCaptcha) genCaptchaThumbImage(size Size, dots map[int]CharDot) (string, error) {
+	var drawDots []DrawDot
+
+	fontWidth := size.Width / len(dots)
+	for i, dot := range dots {
+		Dx := int(math.Max(float64(fontWidth*i+fontWidth/dot.Width), 8))
+		Dy := size.Height/2 + dot.Size/2 - rand.Intn(size.Height/16*len(dot.Text))
+
+		drawDot := DrawDot{
+			Dx:      Dx,
+			Dy:      Dy,
+			FontDPI: cc.config.fontDPI,
+			Text:    dot.Text,
+			Angle:   dot.Angle,
+			Color:   dot.Color2,
+			Size:    dot.Size,
+			Width:   dot.Width,
+			Height:  dot.Height,
+			Font:    toft.GetRandomStringValue(cc.config.rangFont),
+		}
+		drawDots = append(drawDots, drawDot)
+	}
+
+	params := DrawCanvas{
+		Width:                 size.Width,
+		Height:                size.Height,
+		CaptchaDrawDot:        drawDots,
+		BackgroundDistort:     cc.getRandDistortWithLevel(cc.config.thumbFontDistort),
+		BackgroundCirclesNum:  cc.config.thumbBgCirclesNum,
+		BackgroundSlimLineNum: cc.config.thumbBgSlimLineNum,
+	}
+
+	if len(cc.config.rangThumbBackground) > 0 {
+		params.Background = toft.GetRandomStringValue(cc.config.rangThumbBackground)
+	}
+
+	var colorA []color.Color
+	for _, cStr := range cc.config.rangThumbFontColors {
+		co, _ := toft.ParseHexColorToRGBA(cStr)
+		colorA = append(colorA, co)
+	}
+
+	var colorB []color.Color
+	for _, co := range cc.config.rangThumbBgColors {
+		rc, _ := toft.ParseHexColorToRGBA(co)
+		colorB = append(colorB, rc)
+	}
+
+	img, err := cc.captchaDraw.DrawWithPalette(params, colorA, colorB)
+	if err != nil {
+		return "", err
+	}
+
+	// 转 base64
+	dist := toft.EncodingImageToBase64StrForPng(img)
+	return dist, err
+}
+
+//// EncodeB64string is a function
+///**
+// * @Description: base64编码
+// * @receiver cc
+// * @param img
+// * @return string
+// */
+//func (cc *ClickCaptcha) EncodeB64stringWithPng(img image.Image) string {
+//	return EncodeB64stringWithPng(img)
+//}
 
 /**
  * @Description: 获取随机角度
@@ -251,21 +333,7 @@ func (cc *ClickCaptcha) getRandAngle() int {
 	return res
 }
 
-/**
- * @Description: 随机获取颜色
- * @param colors
- * @return string
- */
-func (cc *ClickCaptcha) getRandColor(colors []string) string {
-	colorLen := len(colors)
-	index := toft.RandInt(0, colorLen)
-	if index >= colorLen {
-		index = colorLen - 1
-	}
-
-	return colors[index]
-}
-
+//getClickCaptchaChars 获取点选验证码随机字符
 func (_ *ClickCaptcha) getClickCaptchaChars(length int) string {
 	var strA []string
 	r := make(map[string]interface{})
@@ -281,22 +349,24 @@ func (_ *ClickCaptcha) getClickCaptchaChars(length int) string {
 }
 
 /**
- * @Description: 随机获取值
- * @param strs
- * @return string
+ * @Description: 根据级别获取扭曲程序
+ * @receiver cc
+ * @param level
+ * @return int
  */
-func (cc *ClickCaptcha) genRandWithString(strs []string) string {
-	strLen := len(strs)
-	if strLen == 0 {
-		return ""
+func (cc *ClickCaptcha) getRandDistortWithLevel(level int) int {
+	if level == 1 {
+		return toft.RandInt(240, 320)
+	} else if level == 2 {
+		return toft.RandInt(180, 240)
+	} else if level == 3 {
+		return toft.RandInt(120, 180)
+	} else if level == 4 {
+		return toft.RandInt(100, 160)
+	} else if level == 5 {
+		return toft.RandInt(80, 140)
 	}
-
-	index := toft.RandInt(0, strLen)
-	if index >= strLen {
-		index = strLen - 1
-	}
-
-	return strs[index]
+	return 0
 }
 
 // CharDot is a type

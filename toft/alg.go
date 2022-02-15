@@ -1,7 +1,10 @@
 package toft
 
 import (
+	"crypto/md5"
 	randC "crypto/rand"
+	"encoding/hex"
+	"image/color"
 	"math"
 	"math/big"
 	"math/rand"
@@ -87,4 +90,31 @@ func RandInt(min, max int) int {
 	}
 	result, _ := randC.Int(randC.Reader, big.NewInt(int64(max-min+1)))
 	return int(int64(min) + result.Int64())
+}
+
+//GetRandomStringValue 从字符串列表中随机获取一个值
+func GetRandomStringValue(s []string) string {
+	sLen := len(s)
+	index := RandInt(0, sLen)
+	if index >= sLen {
+		index = sLen - 1
+	}
+	return s[index]
+}
+
+//GetRandomColorValueByRGBA 从Color列表中随机获取一个颜色的RGBA值
+func GetRandomColorValueByRGBA(cs []color.Color) color.RGBA {
+	cLen := len(cs)
+	index := RandInt(0, cLen)
+	if index >= cLen {
+		index = cLen - 1
+	}
+	r, g, b, a := cs[index].RGBA()
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+}
+
+func Md5ToStr(str string) string {
+	h := md5.New()
+	h.Write([]byte(str))
+	return hex.EncodeToString(h.Sum(nil))
 }
