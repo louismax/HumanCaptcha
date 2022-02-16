@@ -340,7 +340,8 @@ func (_ *ClickCaptcha) getClickCaptchaChars(length int) string {
 	var strA []string
 	r := make(map[string]interface{})
 	for len(strA) < length {
-		uChar, char := toft.RandomCreateZHCNUnicode()
+		//uChar, char := toft.RandomCreateZHCNUnicode()
+		uChar, char := toft.RandomCreateSimplifyZHCNUnicode()
 		if _, ok := r[uChar]; !ok {
 			r[uChar] = char
 			strA = append(strA, char)

@@ -31,3 +31,12 @@ func (w CustomImageSize) Join(o *ClickCaptcha) error {
 	o.config.imageSize = w.size
 	return nil
 }
+
+type CustomRangFont struct {
+	fonts []string
+}
+
+func (w CustomRangFont) Join(o *ClickCaptcha) error {
+	o.config.rangFont = w.fonts
+	return nil
+}

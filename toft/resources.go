@@ -1,15 +1,12 @@
 package toft
 
 var defaultAssetsFont = []string{
-	"assets/fonts/fzshengsksjw_cu.ttf",
+	"resources/fonts/cerxwz.ttf",
 }
 
 var defaultAssetsImage = []string{
-	"assets/images/1.jpg",
-	"assets/images/2.jpg",
-	"assets/images/3.jpg",
-	"assets/images/4.jpg",
-	"assets/images/5.jpg",
+	"resources/images/m1.jpg",
+	"resources/images/m2.jpg",
 }
 
 func DefaultBinFontList() []string {

@@ -29,7 +29,8 @@ func main() {
 
 func getCaptchaData(w http.ResponseWriter, r *http.Request) {
 	capt := captcha.NewClickCaptcha(
-		captcha.InjectTextRangLenConfig(15, 25),
+	//captcha.InjectTextRangLenConfig(15, 25),
+	//captcha.InjectFontConfig([]string{"mkwt.ttf"}),
 	)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")

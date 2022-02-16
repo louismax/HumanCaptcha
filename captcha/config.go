@@ -135,8 +135,8 @@ type ClickCaptchaConfig struct {
 
 func GetClickCaptchaDefaultConfig() *ClickCaptchaConfig {
 	return &ClickCaptchaConfig{
-		rangTextLen:      RangeVal{18, 24},
-		rangCheckTextLen: RangeVal{4, 8},
+		rangTextLen:      RangeVal{6, 10},
+		rangCheckTextLen: RangeVal{2, 4},
 		rangTexAnglePos: []RangeVal{
 			{20, 35},
 			{35, 45},
