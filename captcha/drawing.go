@@ -3,6 +3,7 @@ package captcha
 import (
 	"fmt"
 	"github.com/golang/freetype"
+	"github.com/louismax/HumanCaptcha/assets"
 	"github.com/louismax/HumanCaptcha/toft"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
@@ -109,7 +110,7 @@ func (cd *Drawing) Draw(params DrawCanvas) (image.Image, error) {
 	}
 
 	bgFile := params.Background
-	imgBg, iErr := getAssetCache(bgFile)
+	imgBg, iErr := assets.GetClickCaptchaAssetCache(bgFile)
 	if iErr != nil {
 		return canvas, iErr
 	}
@@ -161,7 +162,7 @@ func (cd *Drawing) DrawWithPalette(params DrawCanvas, colorA []color.Color, colo
 
 	for _, dot := range dots {
 		// 读字体数据
-		fontBytes, err := getAssetCache(dot.Font)
+		fontBytes, err := assets.GetClickCaptchaAssetCache(dot.Font)
 		if err != nil {
 			return canvas, err
 		}
@@ -195,7 +196,7 @@ func (cd *Drawing) DrawWithPalette(params DrawCanvas, colorA []color.Color, colo
 
 	if params.Background != "" {
 		bgFile := params.Background
-		imgBg, iErr := getAssetCache(bgFile)
+		imgBg, iErr := assets.GetClickCaptchaAssetCache(bgFile)
 		if iErr != nil {
 			return canvas, iErr
 		}
@@ -330,7 +331,7 @@ func (cd *Drawing) DrawStrImg(dot DrawDot, colorArr []color.RGBA, fc color.Color
 	}, colorArr)
 
 	// 读字体数据
-	fontBytes, err := getAssetCache(dot.Font)
+	fontBytes, err := assets.GetClickCaptchaAssetCache(dot.Font)
 	if err != nil {
 		return canvas
 	}

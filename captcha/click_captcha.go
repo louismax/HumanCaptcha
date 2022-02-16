@@ -65,6 +65,8 @@ func (cc *ClickCaptcha) Generate() (map[int]CharDot, string, string, string, err
 		return nil, "", "", "", fmt.Errorf("获取随机字符串失败")
 	}
 
+	fmt.Println(chars)
+
 	var err error
 	var allDots, thumbDots, checkDots map[int]CharDot
 	var imageBase64, tImageBase64 string
