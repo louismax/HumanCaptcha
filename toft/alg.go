@@ -4,12 +4,15 @@ import (
 	"crypto/md5"
 	randC "crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"image/color"
 	"math"
 	"math/big"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 	"unicode"
 	"unsafe"
@@ -129,8 +132,32 @@ func GetRandomColorValueByRGBA(cs []color.Color) color.RGBA {
 	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+//GenCaptchaKey 生成唯一KEY
+func GenCaptchaKey(str string) (string, error) {
+	t := GenUniqueId()
+	keyStr := Md5ToStr(str + t)
+	return keyStr, nil
+}
+
+//Md5ToStr MD5加密字符串
 func Md5ToStr(str string) string {
 	h := md5.New()
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+var num int64
+
+func GenUniqueId() string {
+	t := time.Now()
+	s := t.Format("20060102150405")
+	m := t.UnixNano()/1e6 - t.UnixNano()/1e9*1e3
+	ms := fmt.Sprintf("%0*d", 3, m)
+	p := os.Getpid() % 1000
+	ps := fmt.Sprintf("%0*d", 3, int64(p))
+	i := atomic.AddInt64(&num, 1)
+	r := i % 10000
+	rs := fmt.Sprintf("%0*d", 4, r)
+	n := fmt.Sprintf("%s%s%s%s", s, ms, ps, rs)
+	return n
 }

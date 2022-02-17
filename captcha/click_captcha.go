@@ -14,8 +14,6 @@ import (
 )
 
 type ClickCaptcha struct {
-	// 随机字符串集合
-	chars *[]string
 	// 点选验证码配置
 	config *ClickCaptchaConfig
 	// 验证图像数据
@@ -39,24 +37,13 @@ func NewClickCaptcha(opts ...ClickCaptchaConfigOption) *ClickCaptcha {
 
 func initClickCaptcha() *ClickCaptcha {
 	return &ClickCaptcha{
-		//chars:       GetCaptchaDefaultChars(),
 		config:      GetClickCaptchaDefaultConfig(),
 		captchaDraw: &Drawing{},
 	}
 }
 
-// Generate is a function
-/**
- * @Description: 			生成验证码
- * @param imageSize			主图尺寸
- * @param thumbnailSize		缩略图尺寸
- * @return CaptchaCharDot	位置信息
- * @return string			主图Base64
- * @return string			验证码KEY
- * @return string			缩略图Base64
- * @return error
- */
-func (cc *ClickCaptcha) Generate() (map[int]CharDot, string, string, string, error) {
+//GenerateClickCaptcha 生成点选验证码
+func (cc *ClickCaptcha) GenerateClickCaptcha() (map[int]CharDot, string, string, string, error) {
 	length := toft.RandInt(cc.config.rangTextLen.Min, cc.config.rangTextLen.Max)
 
 	//获取随机字符串
@@ -89,21 +76,8 @@ func (cc *ClickCaptcha) Generate() (map[int]CharDot, string, string, string, err
 	}
 
 	str, _ := json.Marshal(checkDots)
-	key, _ := cc.genCaptchaKey(string(str))
+	key, _ := toft.GenCaptchaKey(string(str))
 	return checkDots, imageBase64, tImageBase64, key, nil
-}
-
-/**
- * @Description: 生成唯一KEY
- * @receiver cc
- * @param str
- * @return string
- * @return error
- */
-func (cc *ClickCaptcha) genCaptchaKey(str string) (string, error) {
-	t := GenUniqueId()
-	keyStr := toft.Md5ToStr(str + t)
-	return keyStr, nil
 }
 
 /**
@@ -336,18 +310,26 @@ func (cc *ClickCaptcha) getRandAngle() int {
 }
 
 //getClickCaptchaChars 获取点选验证码随机字符
-func (_ *ClickCaptcha) getClickCaptchaChars(length int) string {
+func (cc *ClickCaptcha) getClickCaptchaChars(length int) string {
 	var strA []string
 	r := make(map[string]interface{})
-	for len(strA) < length {
-		//uChar, char := toft.RandomCreateZHCNUnicode()
-		uChar, char := toft.RandomCreateSimplifyZHCNUnicode()
-		if _, ok := r[uChar]; !ok {
-			r[uChar] = char
-			strA = append(strA, char)
+	if cc.config.HasCompleteGB2312Chars {
+		for len(strA) < length {
+			uChar, char := toft.RandomCreateZHCNUnicode()
+			if _, ok := r[uChar]; !ok {
+				r[uChar] = char
+				strA = append(strA, char)
+			}
+		}
+	} else {
+		for len(strA) < length {
+			uChar, char := toft.RandomCreateSimplifyZHCNUnicode()
+			if _, ok := r[uChar]; !ok {
+				r[uChar] = char
+				strA = append(strA, char)
+			}
 		}
 	}
-
 	return strings.Join(strA, ":")
 }
 

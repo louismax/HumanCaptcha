@@ -14,7 +14,15 @@ import (
 	"time"
 )
 
+var capt *captcha.ClickCaptcha
+
 func main() {
+	capt = captcha.NewClickCaptcha(
+		//captcha.InjectTextRangLenConfig(15, 25),
+		captcha.InjectCompleteGB2312CharsConfig(true),
+		captcha.InjectFontConfig([]string{"resources/fonts/simhei.ttf"}),
+	)
+
 	// Example: Get captcha data
 	http.HandleFunc("/api/go_captcha_data", getCaptchaData)
 	// Example: Post check data
@@ -28,10 +36,6 @@ func main() {
 }
 
 func getCaptchaData(w http.ResponseWriter, r *http.Request) {
-	capt := captcha.NewClickCaptcha(
-	//captcha.InjectTextRangLenConfig(15, 25),
-	//captcha.InjectFontConfig([]string{"mkwt.ttf"}),
-	)
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -79,7 +83,7 @@ func getCaptchaData(w http.ResponseWriter, r *http.Request) {
 	//capt.SetThumbBgCirclesNum(200)
 	//capt.SetImageFontAlpha(0.5)
 
-	dots, b64, tb64, key, err := capt.Generate()
+	dots, b64, tb64, key, err := capt.GenerateClickCaptcha()
 	if err != nil {
 		bt, _ := json.Marshal(map[string]interface{}{
 			"code":    1,

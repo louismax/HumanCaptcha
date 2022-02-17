@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/louismax/HumanCaptcha/assets"
 	"github.com/louismax/HumanCaptcha/toft"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 )
 
@@ -55,5 +56,14 @@ func InjectFontConfig(fonts []string, args ...bool) ClickCaptchaConfigOption {
 	}
 	return CustomRangFont{
 		fonts: fonts,
+	}
+}
+
+func InjectCompleteGB2312CharsConfig(v bool) ClickCaptchaConfigOption {
+	if v {
+		logrus.Warn("Custom configuration using GB2312 character set, there may be font files cannot render some characters!! You are advised to replace the font file that fully supports GB2312！")
+	}
+	return CustomCompleteGB2312Chars{
+		val: v,
 	}
 }

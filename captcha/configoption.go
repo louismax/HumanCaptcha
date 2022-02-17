@@ -40,3 +40,12 @@ func (w CustomRangFont) Join(o *ClickCaptcha) error {
 	o.config.rangFont = w.fonts
 	return nil
 }
+
+type CustomCompleteGB2312Chars struct {
+	val bool
+}
+
+func (w CustomCompleteGB2312Chars) Join(o *ClickCaptcha) error {
+	o.config.HasCompleteGB2312Chars = w.val
+	return nil
+}

@@ -60,27 +60,9 @@ const (
 	QualityCompressLevel5 = 20
 )
 
-var textColors = []string{
-	"#fde98e",
-	"#60c1ff",
-	"#fcb08e",
-	"#fb88ff",
-	"#b4fed4",
-	"#cbfaa9",
-}
-
-var thumbTextColors = []string{
-	"#006600",
-	"#005db9",
-	"#aa002a",
-	"#875400",
-	"#6e3700",
-	"#660033",
-}
-
-var textShadowColor = "#101010"
-
 type ClickCaptchaConfig struct {
+	//是否使用完整的GB2312汉字
+	HasCompleteGB2312Chars bool
 	// 随机字符串长度范围
 	rangTextLen RangeVal
 	// 随机验证字符串长度范围, 注意：RangCheckTextLen < RangTextLen
@@ -135,8 +117,9 @@ type ClickCaptchaConfig struct {
 
 func GetClickCaptchaDefaultConfig() *ClickCaptchaConfig {
 	return &ClickCaptchaConfig{
-		rangTextLen:      RangeVal{6, 10},
-		rangCheckTextLen: RangeVal{2, 4},
+		HasCompleteGB2312Chars: false,
+		rangTextLen:            RangeVal{6, 10},
+		rangCheckTextLen:       RangeVal{2, 4},
 		rangTexAnglePos: []RangeVal{
 			{20, 35},
 			{35, 45},
@@ -148,51 +131,48 @@ func GetClickCaptchaDefaultConfig() *ClickCaptchaConfig {
 			{325, 345},
 			{345, 365},
 		},
-		rangFontSize:        RangeVal{30, 38},
-		fontDPI:             72,
-		rangCheckFontSize:   RangeVal{24, 30},
-		imageFontDistort:    DistortNone,
-		imageFontAlpha:      1,
-		rangFontColors:      getDefaultTextColors(),
-		showTextShadow:      true,
-		textShadowColor:     getDefaultTextShadowColor(),
-		textShadowPoint:     Point{-1, -1},
-		rangThumbFontColors: getDefaultThumbTextColors(),
-		fontHinting:         font.HintingNone,
-		imageSize:           Size{300, 240},
-		imageQuality:        QualityCompressLevel1,
-		thumbnailSize:       Size{150, 40},
-		rangThumbBgColors:   getDefaultThumbTextColors(),
-		thumbFontDistort:    DistortLevel3,
-		thumbBgDistort:      DistortLevel4,
-		thumbBgCirclesNum:   24,
-		thumbBgSlimLineNum:  2,
+		rangFontSize:      RangeVal{30, 38},
+		fontDPI:           72,
+		rangCheckFontSize: RangeVal{24, 30},
+		imageFontDistort:  DistortNone,
+		imageFontAlpha:    1,
+		rangFontColors: []string{
+			"#fde98e",
+			"#60c1ff",
+			"#fcb08e",
+			"#fb88ff",
+			"#b4fed4",
+			"#cbfaa9",
+		},
+		showTextShadow:  true,
+		textShadowColor: "#101010",
+		textShadowPoint: Point{-1, -1},
+		rangThumbFontColors: []string{
+			"#006600",
+			"#005db9",
+			"#aa002a",
+			"#875400",
+			"#6e3700",
+			"#660033",
+		},
+		fontHinting:   font.HintingNone,
+		imageSize:     Size{300, 240},
+		imageQuality:  QualityCompressLevel1,
+		thumbnailSize: Size{150, 40},
+		rangThumbBgColors: []string{
+			"#006600",
+			"#005db9",
+			"#aa002a",
+			"#875400",
+			"#6e3700",
+			"#660033",
+		},
+		thumbFontDistort:   DistortLevel3,
+		thumbBgDistort:     DistortLevel4,
+		thumbBgCirclesNum:  24,
+		thumbBgSlimLineNum: 2,
 
 		rangFont:       toft.DefaultBinFontList(),
 		rangBackground: toft.DefaultBinImageList(),
 	}
-}
-
-/**
- * @Description: 获取默认文本颜色
- * @return []string
- */
-func getDefaultTextColors() []string {
-	return textColors
-}
-
-/**
- * @Description: 获取默认阴影文本颜色
- * @return string
- */
-func getDefaultTextShadowColor() string {
-	return textShadowColor
-}
-
-/**
- * @Description: 获取默认缩略图文本颜色
- * @return []string
- */
-func getDefaultThumbTextColors() []string {
-	return thumbTextColors
 }
