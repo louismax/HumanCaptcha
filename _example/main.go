@@ -18,9 +18,9 @@ var capt *captcha.ClickCaptcha
 
 func main() {
 	capt = captcha.NewClickCaptcha(
-		//captcha.InjectTextRangLenConfig(15, 25),
-		//captcha.InjectCompleteGB2312CharsConfig(true),
-		//captcha.InjectFontConfig([]string{"resources/fonts/simhei.ttf"}),
+	//captcha.InjectTextRangLenConfig(15, 25),
+	//captcha.InjectCompleteGB2312CharsConfig(true),
+	//captcha.InjectFontConfig([]string{"resources/fonts/simhei.ttf"}),
 	)
 
 	// Example: Get captcha data
@@ -67,7 +67,7 @@ func checkCaptcha(w http.ResponseWriter, r *http.Request) {
 	if dots == "" || key == "" {
 		bt, _ := json.Marshal(map[string]interface{}{
 			"code":    code,
-			"message": "dots or key param is empty",
+			"message": "点参数不允许为空",
 		})
 		_, _ = fmt.Fprintf(w, string(bt))
 		return
@@ -77,7 +77,7 @@ func checkCaptcha(w http.ResponseWriter, r *http.Request) {
 	if cacheData == "" {
 		bt, _ := json.Marshal(map[string]interface{}{
 			"code":    code,
-			"message": "illegal key",
+			"message": "非法key",
 		})
 		_, _ = fmt.Fprintf(w, string(bt))
 		return
