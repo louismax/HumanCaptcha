@@ -13,7 +13,7 @@ import (
 	mRand "math/rand"
 )
 
-// DrawDot is a type
+// DrawDot 绘制点
 type DrawDot struct {
 	Dx      int
 	Dy      int
@@ -28,10 +28,7 @@ type DrawDot struct {
 	Font    string
 }
 
-// DrawCanvas is a type
-/**
- * @Description: 验证码画图
- */
+// DrawCanvas 绘制画布
 type DrawCanvas struct {
 	// 长、高
 	Width  int
@@ -58,24 +55,14 @@ type DrawCanvas struct {
 	TextShadowPoint Point
 }
 
-// AreaPoint is a type
-/**
- * @Description: 区域点信息
- */
+// AreaPoint 区域点信息
 type AreaPoint struct {
 	MinX, MaxX, MinY, MaxY int
 }
 
 type Drawing struct{}
 
-// Draw is a function
-/**
- * @Description: 画图
- * @receiver cd
- * @param params
- * @return image.Image
- * @return error
- */
+// Draw 绘制
 func (cd *Drawing) Draw(params DrawCanvas) (image.Image, error) {
 	dots := params.CaptchaDrawDot
 	canvas := cd.CreateCanvas(params, true)
@@ -129,16 +116,7 @@ func (cd *Drawing) Draw(params DrawCanvas) (image.Image, error) {
 	return subImg, nil
 }
 
-// DrawWithPalette is a function
-/**
- * @Description: 使用调色板的画布绘图
- * @receiver cd
- * @param params
- * @param colorA
- * @param colorB
- * @return image.Image
- * @return error
- */
+// DrawWithPalette 使用调色板的画布绘图
 func (cd *Drawing) DrawWithPalette(params DrawCanvas, colorA []color.Color, colorB []color.Color) (image.Image, error) {
 	dots := params.CaptchaDrawDot
 	p := []color.Color{
@@ -154,10 +132,10 @@ func (cd *Drawing) DrawWithPalette(params DrawCanvas, colorA []color.Color, colo
 	canvas := NewPalette(image.Rect(0, 0, params.Width, params.Height), p)
 
 	if params.BackgroundCirclesNum > 0 {
-		cd.fillWithCircles(canvas, params.BackgroundCirclesNum, 1, 2)
+		cd.rangFillWithCircles(canvas, params.BackgroundCirclesNum, 1, 2)
 	}
 	if params.BackgroundSlimLineNum > 0 {
-		cd.drawSlimLine(canvas, params.BackgroundSlimLineNum, colorB)
+		cd.drawLine(canvas, params.BackgroundSlimLineNum, colorB)
 	}
 
 	for _, dot := range dots {
@@ -223,14 +201,7 @@ func (cd *Drawing) DrawWithPalette(params DrawCanvas, colorA []color.Color, colo
 	return canvas, nil
 }
 
-// CreateCanvas is a function
-/**
- * @Description: 创建画布
- * @receiver cd
- * @param params
- * @param isAlpha
- * @return *image.NRGBA
- */
+// CreateCanvas 创建画布
 func (cd *Drawing) CreateCanvas(params DrawCanvas, isAlpha bool) (img *image.NRGBA) {
 	width := params.Width
 	height := params.Height
@@ -248,23 +219,14 @@ func (cd *Drawing) CreateCanvas(params DrawCanvas, isAlpha bool) (img *image.NRG
 	return
 }
 
-// DrawTextImg is a function
-/**
- * @Description: 绘制文本的图片
- * @receiver cd
- * @param dot
- * @param params
- * @return *Palette
- * @return *AreaPoint
- * @return error
- */
+// DrawTextImg 绘制文本的图片
 func (cd *Drawing) DrawTextImg(dot DrawDot, params DrawCanvas) (*Palette, *AreaPoint, error) {
 	// 绘制文本
 	textColor, _ := toft.ParseHexColorToRGBA(dot.Color)
 	var coArr = []color.RGBA{
 		textColor,
 	}
-	textColor.A = cd.formatAlpha(params.TextAlpha)
+	textColor.A = cd.formatDiaphanous(params.TextAlpha)
 	textImg := cd.DrawStrImg(dot, coArr, textColor)
 
 	// 主画板
@@ -314,16 +276,7 @@ func (cd *Drawing) DrawTextImg(dot DrawDot, params DrawCanvas) (*Palette, *AreaP
 	return canvas, ap, nil
 }
 
-// DrawTextImg is a function
-/**
- * @Description: 绘制文本的图片
- * @receiver cd
- * @param dot
- * @param params
- * @return *Palette
- * @return *AreaPoint
- * @return error
- */
+// DrawStrImg 绘制字符图片
 func (cd *Drawing) DrawStrImg(dot DrawDot, colorArr []color.RGBA, fc color.Color) *Palette {
 	canvas := cd.CreateCanvasWithPalette(DrawCanvas{
 		Width:  dot.Width + 10,
@@ -370,26 +323,14 @@ func (cd *Drawing) DrawStrImg(dot DrawDot, colorArr []color.RGBA, fc color.Color
 	return canvas
 }
 
-/**
- * @Description: 格式透明度
- * @receiver cd
- * @param val
- * @return uint8
- */
-func (cd *Drawing) formatAlpha(val float64) uint8 {
+//formatDiaphanous 透明样式
+func (cd *Drawing) formatDiaphanous(val float64) uint8 {
 	a := math.Min(val, 1)
 	alpha := a * 255
 	return uint8(alpha)
 }
 
-// CreateCanvasWithPalette is a function
-/**
- * @Description: 创建 Palette 带调色板的画布
- * @receiver cd
- * @param params
- * @param colorArr
- * @return *Palette
- */
+// CreateCanvasWithPalette 创建带调色板的画布
 func (cd *Drawing) CreateCanvasWithPalette(params DrawCanvas, colorArr []color.RGBA) *Palette {
 	width := params.Width
 	height := params.Height
@@ -404,12 +345,7 @@ func (cd *Drawing) CreateCanvasWithPalette(params DrawCanvas, colorArr []color.R
 	return NewPalette(image.Rect(0, 0, width, height), p)
 }
 
-/**
- * @Description: 计算剪裁空白多余空白
- * @receiver cd
- * @param pa
- * @return *AreaPoint
- */
+//calcImageSpace 计算图片空白区域
 func (cd *Drawing) calcImageSpace(pa *Palette) *AreaPoint {
 	nW := pa.Bounds().Max.X
 	nH := pa.Bounds().Max.Y
@@ -452,15 +388,7 @@ func (cd *Drawing) calcImageSpace(pa *Palette) *AreaPoint {
 	}
 }
 
-/**
- * @Description: 随机裁剪图片位置
- * @receiver cd
- * @param width
- * @param height
- * @param img
- * @return x
- * @return y
- */
+//rangCutImage 随机裁剪图片
 func (cd *Drawing) rangCutImage(width int, height int, img image.Image) (int, int) {
 	b := img.Bounds()
 	iW := b.Max.X
@@ -478,32 +406,19 @@ func (cd *Drawing) rangCutImage(width int, height int, img image.Image) (int, in
 	return curX, curY
 }
 
-/**
- * @Description: 随意填充小圆点
- * @receiver cd
- * @param m
- * @param n
- * @param maxRadius
- * @param circleCount
- */
-func (cd *Drawing) fillWithCircles(m *Palette, n, maxRadius int, circleCount int) {
-	maxx := m.Bounds().Max.X
-	maxy := m.Bounds().Max.Y
+//rangFillWithCircles 随机填充圆点
+func (cd *Drawing) rangFillWithCircles(m *Palette, n, maxRadius int, circleCount int) {
+	maxX := m.Bounds().Max.X
+	maxY := m.Bounds().Max.Y
 	for i := 0; i < n; i++ {
 		colorIdx := uint8(toft.RandInt(1, circleCount-1))
 		r := toft.RandInt(1, maxRadius)
-		m.drawCircle(toft.RandInt(r, maxx-r), toft.RandInt(r, maxy-r), r, colorIdx)
+		m.drawCircle(toft.RandInt(r, maxX-r), toft.RandInt(r, maxY-r), r, colorIdx)
 	}
 }
 
-/**
- * @Description: 画N条随机细线
- * @receiver cd
- * @param m
- * @param num
- * @param colorB
- */
-func (cd *Drawing) drawSlimLine(m *Palette, num int, colorB []color.Color) {
+//drawLine 绘制线条
+func (cd *Drawing) drawLine(m *Palette, num int, colorB []color.Color) {
 	first := m.Bounds().Max.X / 10
 	end := first * 9
 	y := m.Bounds().Max.Y / 3

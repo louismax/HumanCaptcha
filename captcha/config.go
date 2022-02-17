@@ -1,7 +1,6 @@
 package captcha
 
 import (
-	"github.com/louismax/HumanCaptcha/toft"
 	"golang.org/x/image/font"
 )
 
@@ -9,35 +8,21 @@ type ClickCaptchaConfigOption interface {
 	Join(settings *ClickCaptcha) error
 }
 
-// RangeVal is a type
-/**
- * @Description: 范围值
- * @Example: {min: 0, max: 45} 从0-45中取任意值
- */
+// RangeVal 范围值
 type RangeVal struct {
 	Min, Max int
 }
 
-// Size is a type
-/**
- * @Description: 尺寸
- * @Example: {width: 0, height: 45} 从0-45中取任意值
- */
+// Size 尺寸
 type Size struct {
 	Width, Height int
 }
 
-// Point is a type
-/**
- * @Description: 点
- */
+// Point 点位置
 type Point struct {
 	X, Y int
 }
 
-/**
- * @Description: 扭曲程度
- */
 const (
 	DistortNone   = iota // 无扭曲
 	DistortLevel1        // 扭曲程度 1级别
@@ -47,9 +32,6 @@ const (
 	DistortLevel5        // 扭曲程度 5级别
 )
 
-/**
- * @Description: 质量压缩程度
- */
 const (
 	QualityCompressNone = iota // 无压缩质量,原图
 
@@ -59,6 +41,29 @@ const (
 	QualityCompressLevel4 = 40
 	QualityCompressLevel5 = 20
 )
+
+//CharDot 图片点数据
+type CharDot struct {
+	// 顺序索引
+	Index int
+	// x,y位置
+	Dx int
+	Dy int
+	// 字体大小
+	Size int
+	// 字体宽
+	Width int
+	// 字体高
+	Height int
+	// 字符文本
+	Text string
+	// 字体角度
+	Angle int
+	// 颜色
+	Color string
+	// 颜色2
+	Color2 string
+}
 
 type ClickCaptchaConfig struct {
 	//是否使用完整的GB2312汉字
@@ -172,7 +177,12 @@ func GetClickCaptchaDefaultConfig() *ClickCaptchaConfig {
 		thumbBgCirclesNum:  24,
 		thumbBgSlimLineNum: 2,
 
-		rangFont:       toft.DefaultBinFontList(),
-		rangBackground: toft.DefaultBinImageList(),
+		rangFont: []string{
+			"resources/fonts/default.ttf",
+		},
+		rangBackground: []string{
+			"resources/images/m1.jpg",
+			"resources/images/m2.jpg",
+		},
 	}
 }

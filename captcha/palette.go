@@ -6,33 +6,19 @@ import (
 	"math"
 )
 
-// Palette is a type
-/**
- * @Description: 调色板
- */
+// Palette 调色板
 type Palette struct {
 	*image.Paletted
 }
 
-// NewPalette is a function
-/**
- * @Description: 创建调色板
- * @param r
- * @param p
- * @return *Palette
- */
+// NewPalette 创建调色板
 func NewPalette(r image.Rectangle, p color.Palette) *Palette {
 	return &Palette{
 		image.NewPaletted(r, p),
 	}
 }
 
-// Rotate is a function
-/**
- * @Description: 旋转任意角度
- * @receiver p
- * @param angle
- */
+// Rotate 旋转任意角度
 func (p *Palette) Rotate(angle int) {
 	tarImg := p
 	width := tarImg.Bounds().Max.X
@@ -55,16 +41,7 @@ func (p *Palette) Rotate(angle int) {
 	}
 }
 
-/**
- * @Description: 角度转换点坐标
- * @receiver p
- * @param x
- * @param y
- * @param r
- * @param angle
- * @return tarX
- * @return tarY
- */
+//angleSwapPoint 转换点坐标
 func (p *Palette) angleSwapPoint(x, y, r, angle float64) (tarX, tarY float64) {
 	x -= r
 	y = r - y
@@ -77,21 +54,16 @@ func (p *Palette) angleSwapPoint(x, y, r, angle float64) (tarX, tarY float64) {
 	return
 }
 
-/**
- * @Description: 扭曲
- * @receiver p
- * @param amplude
- * @param period
- */
-func (p *Palette) distort(amplude float64, period float64) {
+//distort 扭曲
+func (p *Palette) distort(amplitude float64, period float64) {
 	w := p.Bounds().Max.X
 	h := p.Bounds().Max.Y
 	newP := NewPalette(image.Rect(0, 0, w, h), p.Palette)
 	dx := 2.0 * math.Pi / period
 	for x := 0; x < w; x++ {
 		for y := 0; y < h; y++ {
-			xo := amplude * math.Sin(float64(y)*dx)
-			yo := amplude * math.Cos(float64(x)*dx)
+			xo := amplitude * math.Sin(float64(y)*dx)
+			yo := amplitude * math.Cos(float64(x)*dx)
 			newP.SetColorIndex(x, y, p.ColorIndexAt(x+int(xo), y+int(yo)))
 		}
 	}
@@ -107,28 +79,14 @@ func (p *Palette) distort(amplude float64, period float64) {
 	newP.Palette = nil
 }
 
-/**
- * @Description: 画线
- * @receiver p
- * @param fromX
- * @param toX
- * @param y
- * @param colorIdx
- */
+//drawHorizLine 绘制线条
 func (p *Palette) drawHorizLine(fromX, toX, y int, colorIdx uint8) {
 	for x := fromX; x <= toX; x++ {
 		p.SetColorIndex(x, y, colorIdx)
 	}
 }
 
-/**
- * @Description: 画圆点
- * @receiver p
- * @param x
- * @param y
- * @param radius
- * @param colorIdx
- */
+//drawCircle 绘制圆点
 func (p *Palette) drawCircle(x, y, radius int, colorIdx uint8) {
 	f := 1 - radius
 	dfx := 1
@@ -156,13 +114,7 @@ func (p *Palette) drawCircle(x, y, radius int, colorIdx uint8) {
 	}
 }
 
-/**
- * @Description: 画点到点直线
- * @receiver p
- * @param point1
- * @param point2
- * @param lineColor
- */
+//drawBeeline 绘制直线
 func (p *Palette) drawBeeline(point1 Point, point2 Point, lineColor color.RGBA) {
 	dx := math.Abs(float64(point1.X - point2.X))
 	dy := math.Abs(float64(point2.Y - point1.Y))
