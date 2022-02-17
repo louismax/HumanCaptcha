@@ -302,3 +302,42 @@ func (cc *ClickCaptcha) getContortionsByLevel(level int) int {
 	}
 	return 0
 }
+
+func CheckPointDist(cds []CheckDots, dots map[int]CharDot, paddings ...int64) bool {
+	chkRet := false
+	if len(paddings) > 0 {
+		for i, dot := range dots {
+			chkRet = checkPointDistWithPadding(int64(cds[i].X), int64(cds[i].Y), int64(dot.Dx), int64(dot.Dy), int64(dot.Width), int64(dot.Height), int64(paddings[0]))
+			if !chkRet {
+				break
+			}
+		}
+	} else {
+		for i, dot := range dots {
+			chkRet = checkPointDistSimple(int64(cds[i].X), int64(cds[i].Y), int64(dot.Dx), int64(dot.Dy), int64(dot.Width), int64(dot.Height))
+			if !chkRet {
+				break
+			}
+		}
+	}
+	return chkRet
+}
+
+func checkPointDistSimple(sx, sy, dx, dy, width, height int64) bool {
+	return sx >= dx &&
+		sx <= dx+width &&
+		sy <= dy &&
+		sy >= dy-height
+}
+
+func checkPointDistWithPadding(sx, sy, dx, dy, width, height, padding int64) bool {
+	newWidth := width + (padding * 2)
+	newHeight := height + (padding * 2)
+	newDx := int64(math.Max(float64(dx), float64(dx-padding)))
+	newDy := dy + padding
+
+	return sx >= newDx &&
+		sx <= newDx+newWidth &&
+		sy <= newDy &&
+		sy >= newDy-newHeight
+}

@@ -157,21 +157,24 @@
 		function CheckClick() {
 			
 			
-			var dotsA = []
-			dots.forEach(function (value, key) {
-			    dotsA.push(value.join(","))
-			})
-			console.log(dotsA)
+			// var dotsA = []
+			// dots.forEach(function (value, key) {
+			//     dotsA.push(value.join(","))
+			// })
+			// console.log(dotsA)
 			
-			var data ={'dots': dotsA.join(','), 'key': captchaKey}
+			var data ={'dots': dots, 'key': captchaKey}
 			
-			console.log(data)
+			// console.log(data)
 			
-			const params = FormatParams(data)
+			// const params = FormatParams(data)
+			
 			const httpRequest = new XMLHttpRequest(); // 第一步：建立所需的对象
 			httpRequest.open('POST', "http://127.0.0.1:9001/api/go_captcha_check_data", true); // 第二步：打开连接，将请求参数写在url中
-			httpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			httpRequest.send(params); // 第三步：发送请求，将请求参数写在URL中
+			
+			httpRequest.setRequestHeader("Content-type", "application/json");
+			
+			httpRequest.send(JSON.stringify(data)); // 第三步：发送请求，将请求参数写在URL中
 			// 获取数据后的处理程序
 			httpRequest.onreadystatechange = function () {
 			    var respData;
@@ -198,18 +201,6 @@
 			
 		}
 		
-		/**
-		 * @Description: Ajax格式化请求参数
-		 * @param data
-		 */
-		function FormatParams(data) {
-		    var arr = [];
-		    for (var name in data) {
-		        arr.push(encodeURIComponent(name) + "=" + encodeURIComponent(data[name]))
-		    }
-		    arr.push(("v=" + Math.random()).replace(".", ""))
-		    return arr.join("&")
-		}
 
 		//获取验证数据
 		function GetCaptchaData() {
@@ -267,14 +258,13 @@
 			dot.innerHTML = '<span>' + (dots.length + 1) + '</span>'
 			captchaWrapDom.appendChild(dot)
 
-			// dots.push({
-			// 	x: x,
-			// 	y: y
-			// })
+			dots.push({
+				x: x,
+				y: y
+			})
 			
-			dots.push([x, y])
+			//dots.push([x, y])
 		}
-
 
 		//找到元素的屏幕位置
 		function getDomXY(dom) {
@@ -297,7 +287,6 @@
 				domY: y
 			}
 		}
-
 
 		//为任意元素.绑定任意的事件
 		function addEventListener(el, type, fn) {

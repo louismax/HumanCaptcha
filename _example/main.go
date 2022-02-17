@@ -9,8 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -18,9 +16,9 @@ var capt *captcha.ClickCaptcha
 
 func main() {
 	capt = captcha.NewClickCaptcha(
-	//captcha.InjectTextRangLenConfig(15, 25),
-	//captcha.InjectCompleteGB2312CharsConfig(true),
-	//captcha.InjectFontConfig([]string{"resources/fonts/simhei.ttf"}),
+		//captcha.InjectTextRangLenConfig(15, 25),
+		//captcha.InjectCompleteGB2312CharsConfig(true),
+		//captcha.InjectFontConfig([]string{"resources/fonts/simhei.ttf"}),
 	)
 
 	// Example: Get captcha data
@@ -59,12 +57,32 @@ func getCaptchaData(w http.ResponseWriter, _ *http.Request) {
 }
 
 func checkCaptcha(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	code := 1
-	_ = r.ParseForm()
-	dots := r.Form.Get("dots")
-	key := r.Form.Get("key")
-	if dots == "" || key == "" {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")             //允许访问所有域
+	w.Header().Add("Access-Control-Allow-Headers", "Content-Type") //header的类型
+	w.Header().Set("content-type", "application/json")             //返回数据格式是json
+
+	code := 0
+
+	con, _ := ioutil.ReadAll(r.Body)
+
+	type req struct {
+		Key  string              `json:"key"`
+		Dots []captcha.CheckDots `json:"dots"`
+	}
+
+	reqData := req{}
+	if err := json.Unmarshal(con, &reqData); err != nil {
+		bt, _ := json.Marshal(map[string]interface{}{
+			"code":    code,
+			"message": "参数转换失败",
+		})
+		_, _ = fmt.Fprintf(w, string(bt))
+		return
+	}
+	fmt.Println(reqData)
+
+	if reqData.Key == "" || len(reqData.Dots) < 1 {
 		bt, _ := json.Marshal(map[string]interface{}{
 			"code":    code,
 			"message": "点参数不允许为空",
@@ -73,7 +91,8 @@ func checkCaptcha(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheData := readCache(key)
+	//获取存储的验证信息
+	cacheData := readCache(reqData.Key)
 	if cacheData == "" {
 		bt, _ := json.Marshal(map[string]interface{}{
 			"code":    code,
@@ -82,8 +101,6 @@ func checkCaptcha(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprintf(w, string(bt))
 		return
 	}
-	src := strings.Split(dots, ",")
-
 	var dct map[int]captcha.CharDot
 	if err := json.Unmarshal([]byte(cacheData), &dct); err != nil {
 		bt, _ := json.Marshal(map[string]interface{}{
@@ -94,38 +111,32 @@ func checkCaptcha(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chkRet := false
-	if len(src) >= len(dct)*2 {
-		chkRet = true
-		for i, dot := range dct {
-			j := i * 2
-			k := i*2 + 1
-			sx, _ := strconv.ParseFloat(fmt.Sprintf("%v", src[j]), 64)
-			sy, _ := strconv.ParseFloat(fmt.Sprintf("%v", src[k]), 64)
-			// 检测点位置
-			chkRet = CheckPointDist(int64(sx), int64(sy), int64(dot.Dx), int64(dot.Dy), int64(dot.Width), int64(dot.Height))
-			if !chkRet {
-				break
-			}
-		}
+	if len(reqData.Dots) != len(dct) {
+		bt, _ := json.Marshal(map[string]interface{}{
+			"code":    code,
+			"message": "验证参数长度不够",
+		})
+		_, _ = fmt.Fprintf(w, string(bt))
+		return
 	}
 
-	if chkRet && (len(dct)*2) == len(src) {
-		code = 0
+	fmt.Println(dct)
+
+	if captcha.CheckPointDist(reqData.Dots, dct) {
+		bt, _ := json.Marshal(map[string]interface{}{
+			"code":    1,
+			"message": "ok",
+		})
+		_, _ = fmt.Fprintf(w, string(bt))
+		return
+	} else {
+		bt, _ := json.Marshal(map[string]interface{}{
+			"code":    code,
+			"message": "验证失败",
+		})
+		_, _ = fmt.Fprintf(w, string(bt))
+		return
 	}
-
-	bt, _ := json.Marshal(map[string]interface{}{
-		"code": code,
-	})
-	_, _ = fmt.Fprintf(w, string(bt))
-	return
-}
-
-func CheckPointDist(sx, sy, dx, dy, width, height int64) bool {
-	return sx >= dx &&
-		sx <= dx+width &&
-		sy <= dy &&
-		sy >= dy-height
 }
 
 func readCache(file string) string {

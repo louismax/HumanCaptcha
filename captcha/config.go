@@ -23,6 +23,11 @@ type Point struct {
 	X, Y int
 }
 
+type CheckDots struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
 const (
 	DistortNone   = iota // 无扭曲
 	DistortLevel1        // 扭曲程度 1级别
