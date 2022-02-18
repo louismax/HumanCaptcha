@@ -59,6 +59,7 @@ func InjectFontConfig(fonts []string, args ...bool) ClickCaptchaConfigOption {
 	}
 }
 
+//InjectCompleteGB2312CharsConfig 设置是否使用GB2312字符集
 func InjectCompleteGB2312CharsConfig(v bool) ClickCaptchaConfigOption {
 	if v {
 		logrus.Warn("Custom configuration using GB2312 character set, there may be font files cannot render some characters!! You are advised to replace the font file that fully supports GB2312！")

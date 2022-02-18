@@ -60,6 +60,7 @@ type AreaPoint struct {
 	MinX, MaxX, MinY, MaxY int
 }
 
+//Drawing 绘制
 type Drawing struct{}
 
 // Draw 绘制

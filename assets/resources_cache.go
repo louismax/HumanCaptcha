@@ -5,6 +5,7 @@ import (
 	"github.com/louismax/HumanCaptcha/assets/default_images"
 )
 
+//AssetData 资源
 type AssetData struct {
 	// 路径
 	Path string
