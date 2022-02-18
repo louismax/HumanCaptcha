@@ -4,6 +4,7 @@ import (
 	"golang.org/x/image/font"
 )
 
+//ClickCaptchaConfigOption  点选验证码配置
 type ClickCaptchaConfigOption interface {
 	Join(settings *ClickCaptcha) error
 }
@@ -23,27 +24,39 @@ type Point struct {
 	X, Y int
 }
 
+// CheckDots 验证位置
 type CheckDots struct {
 	X int `json:"x"`
 	Y int `json:"y"`
 }
 
 const (
-	DistortNone   = iota // 无扭曲
-	DistortLevel1        // 扭曲程度 1级别
-	DistortLevel2        // 扭曲程度 2级别
-	DistortLevel3        // 扭曲程度 3级别
-	DistortLevel4        // 扭曲程度 4级别
-	DistortLevel5        // 扭曲程度 5级别
+	//DistortNone 无扭曲
+	DistortNone = iota
+	//DistortLevel1 扭曲程度 1级别
+	DistortLevel1
+	//DistortLevel2 扭曲程度 2级别
+	DistortLevel2
+	//DistortLevel3 扭曲程度 3级别
+	DistortLevel3
+	//DistortLevel4 扭曲程度 4级别
+	DistortLevel4
+	//DistortLevel5 扭曲程度 5级别
+	DistortLevel5
 )
 
 const (
-	QualityCompressNone = iota // 无压缩质量,原图
-
-	QualityCompressLevel1 = 100 // 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
+	//QualityCompressNone 无压缩质量,原图
+	QualityCompressNone = iota
+	//QualityCompressLevel1 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
+	QualityCompressLevel1 = 100
+	//QualityCompressLevel2 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
 	QualityCompressLevel2 = 80
+	//QualityCompressLevel3 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
 	QualityCompressLevel3 = 60
+	//QualityCompressLevel4 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
 	QualityCompressLevel4 = 40
+	//QualityCompressLevel5 质量压缩程度 1-5 级别，压缩级别越低图像越清晰
 	QualityCompressLevel5 = 20
 )
 
@@ -70,6 +83,7 @@ type CharDot struct {
 	Color2 string
 }
 
+//ClickCaptchaConfig 点选验证码配置
 type ClickCaptchaConfig struct {
 	//是否使用完整的GB2312汉字
 	HasCompleteGB2312Chars bool
@@ -125,6 +139,7 @@ type ClickCaptchaConfig struct {
 	thumbBgSlimLineNum int
 }
 
+//GetClickCaptchaDefaultConfig 获取点选验证码默认配置
 func GetClickCaptchaDefaultConfig() *ClickCaptchaConfig {
 	return &ClickCaptchaConfig{
 		HasCompleteGB2312Chars: false,

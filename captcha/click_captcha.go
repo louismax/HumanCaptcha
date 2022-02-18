@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 )
 
+//ClickCaptcha 点选验证码
 type ClickCaptcha struct {
 	// 点选验证码配置
 	config *ClickCaptchaConfig
@@ -22,6 +23,7 @@ type ClickCaptcha struct {
 
 var clickCaptcha *ClickCaptcha
 
+//NewClickCaptcha 创建点选验证码
 func NewClickCaptcha(opts ...ClickCaptchaConfigOption) *ClickCaptcha {
 	if clickCaptcha == nil {
 		clickCaptcha = initClickCaptcha()
@@ -35,6 +37,7 @@ func NewClickCaptcha(opts ...ClickCaptchaConfigOption) *ClickCaptcha {
 	return clickCaptcha
 }
 
+//initClickCaptcha 初始化
 func initClickCaptcha() *ClickCaptcha {
 	return &ClickCaptcha{
 		config:      GetClickCaptchaDefaultConfig(),
@@ -303,6 +306,7 @@ func (cc *ClickCaptcha) getContortionsByLevel(level int) int {
 	return 0
 }
 
+//CheckPointDist 验证点选数据
 func CheckPointDist(cds []CheckDots, dots map[int]CharDot, paddings ...int64) bool {
 	chkRet := false
 	if len(paddings) > 0 {
@@ -323,6 +327,7 @@ func CheckPointDist(cds []CheckDots, dots map[int]CharDot, paddings ...int64) bo
 	return chkRet
 }
 
+//checkPointDistSimple 简单验证
 func checkPointDistSimple(sx, sy, dx, dy, width, height int64) bool {
 	return sx >= dx &&
 		sx <= dx+width &&
@@ -330,6 +335,7 @@ func checkPointDistSimple(sx, sy, dx, dy, width, height int64) bool {
 		sy >= dy-height
 }
 
+//checkPointDistWithPadding 带内边距的验证
 func checkPointDistWithPadding(sx, sy, dx, dy, width, height, padding int64) bool {
 	newWidth := width + (padding * 2)
 	newHeight := height + (padding * 2)
